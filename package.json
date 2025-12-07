@@ -1,0 +1,31 @@
+{
+  "name": "@ashwab/data-view",
+  "version": "1.0.0",
+  "description": "A composition-based data view component system for React/Next.js with filtering, sorting, and pagination",
+  "author": "Essam Barghsh <contact@esssam.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/essambarghsh/data-view.git"
+  },
+  "homepage": "https://github.com/essambarghsh/data-view#readme",
+  "bugs": {
+    "url": "https://github.com/essambarghsh/data-view/issues"
+  },
+  "keywords": [
+    "react",
+    "nextjs",
+    "data-view",
+    "data-table",
+    "filters",
+    "sorting",
+    "pagination",
+    "infinite-scroll",
+    "composition",
+    "typescript",
+    "tailwindcss"
+  ],
+  "publishConfig": {
+    "access": "public"
+  }
+}
