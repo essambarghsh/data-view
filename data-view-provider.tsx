@@ -21,7 +21,7 @@
  * ```
  */
 
-import { useCallback, type ReactNode } from 'react'
+import { useEffect, type ReactNode } from 'react'
 import { DataViewContext, type DataViewContextValue } from './data-view-context'
 import { useDataViewUrlState } from './hooks/use-data-view-url-state'
 import {
@@ -270,9 +270,12 @@ export function DataViewProvider<T, TOutput = T, TTable extends SupabaseTableNam
   // =========================================================================
 
   // Call onRefetchReady when refetch is available
-  if (onRefetchReady && refetch) {
-    onRefetchReady(refetch)
-  }
+  // Must be in useEffect to avoid calling during render
+  useEffect(() => {
+    if (onRefetchReady && refetch) {
+      onRefetchReady(refetch)
+    }
+  }, [onRefetchReady, refetch])
 
   // =========================================================================
   // Context Value
