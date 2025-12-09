@@ -37,7 +37,7 @@ export interface DataViewToolbarProps {
 
 export function DataViewToolbar({ children, className }: DataViewToolbarProps) {
   return (
-    <div className={cn('flex flex-1 gap-2 mb-4', className)}>
+    <div className={cn('flex items-center flex-1 gap-2 mb-4', className)}>
       {children}
     </div>
   )
