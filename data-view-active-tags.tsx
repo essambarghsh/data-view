@@ -155,7 +155,7 @@ export function DataViewActiveTags({
             variant="ghost"
             size="default"
             onClick={handleClearAll}
-            className="text-[0.625rem] font-medium text-destructive hover:text-destructive hover:bg-destructive/10 shrink-0 py-2 px-4 leading-relaxed h-10 rounded-full active:scale-95"
+            className="text-xxs! font-medium text-destructive hover:text-destructive hover:bg-destructive/10 shrink-0 py-2 px-4 leading-relaxed h-10 rounded-full active:scale-95"
           >
             <FunnelX className="size-4 rtl:ml-2 ltr:mr-1 rtl:-mr-1 ltr:-ml-1" />
             {clearAllLabel ? clearAllLabel : t('clearAll')}
