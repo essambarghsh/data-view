@@ -18,6 +18,7 @@ A **Supabase-first** composition-based data view component system for React/Next
 - **🔄 View Mode Toggle** - Switch between list and grid layouts
 - **⚡ SSR Hydration** - Server-side rendering support with initial data
 - **🔧 Extensible** - Also supports custom data fetchers for non-Supabase sources
+- **🔄 Smart Refetch** - Automatically refetches when callback props change (baseQuery, customFetcher, onDataLoaded)
 - **📘 TypeScript First** - Full type safety with Supabase database types
 - **🌐 RTL Support** - Built-in right-to-left language support
 - **♿ Accessible** - Built on Radix UI primitives
@@ -277,6 +278,52 @@ For non-Supabase data sources, use a custom fetcher:
   }}
 >
 ```
+
+### 6. Automatic Refetch on Callback Changes
+
+**NEW**: DataView automatically detects when callback props change and refetches data. No manual refetch needed!
+
+```tsx
+function TasksView({ projectId }) {
+  // Toggle state
+  const [showClosedTasks, setShowClosedTasks] = useState(false)
+  
+  // baseQuery with dependencies - when showClosedTasks changes, baseQuery reference changes
+  const baseQuery = useCallback(
+    (query) => {
+      const statuses = showClosedTasks 
+        ? [...ACTIVE_STATUSES, ...CLOSED_STATUSES]
+        : ACTIVE_STATUSES
+      
+      return query
+        .eq('project_id', projectId)
+        .in('status', statuses)
+    },
+    [projectId, showClosedTasks] // <-- Dependencies
+  )
+  
+  return (
+    <DataViewProvider
+      tableName="tasks"
+      baseQuery={baseQuery} // <-- Automatically refetches when this changes!
+    >
+      <Toggle checked={showClosedTasks} onChange={setShowClosedTasks} />
+      {/* Other components */}
+    </DataViewProvider>
+  )
+}
+```
+
+**How it works:**
+- When `showClosedTasks` changes, `useCallback` returns a new `baseQuery` reference
+- DataView detects the reference change and automatically triggers a refetch
+- Works for `baseQuery`, `customFetcher`, and `onDataLoaded` callbacks
+
+**Benefits:**
+- ✅ No manual `refetch()` calls needed
+- ✅ Cleaner code - declarative behavior
+- ✅ Prevents stale data when callback dependencies change
+- ✅ Works seamlessly with React's `useCallback` hook
 
 ## API Reference
 

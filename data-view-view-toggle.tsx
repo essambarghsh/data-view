@@ -46,10 +46,10 @@ function ViewModeButton({
       variant="ghost"
       size="icon"
       className={cn(
-        'size-9 rounded-lg hover:bg-transparent text-muted-foreground hover:text-foreground',
-        currentMode === mode &&
-        'bg-muted hover:bg-muted hover:text-muted-foreground'
+        'size-9 rounded-lg hover:bg-transparent text-muted-foreground hover:text-foreground transition-none',
+        currentMode === mode && 'bg-muted hover:bg-muted hover:text-muted-foreground'
       )}
+      data-active={currentMode === mode}
       onClick={onClick}
     >
       <Icon className="h-4 w-4" />
@@ -70,7 +70,7 @@ export function DataViewViewToggle({ className }: DataViewViewToggleProps) {
   }
 
   return (
-    <div className={cn('flex items-center border border-border h-12 px-1.25 rounded-xl bg-card', className)}>
+    <div className={cn('flex items-center border border-border h-12 px-1.25 w-auto rounded-xl bg-card', className)}>
       <ViewModeButton
         mode="list"
         currentMode={viewMode}

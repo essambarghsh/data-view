@@ -6,6 +6,12 @@
  * Root provider component that manages all DataView state and data fetching.
  * Integrates useDataViewUrlState and useDataViewInfiniteQuery hooks internally.
  * 
+ * Automatic Refetch Behavior:
+ * - Automatically refetches when filters, search, sort, or pagination changes
+ * - Automatically refetches when callback props change (baseQuery, customFetcher, onDataLoaded)
+ * - Example: If baseQuery is created with useCallback([showClosedTasks]), changing
+ *   showClosedTasks will automatically trigger a refetch with the new query
+ * 
  * @example
  * ```tsx
  * <DataViewProvider tableName="tasks" filters={filters} paginationType="classic">
@@ -17,6 +23,21 @@
  *     <DataViewList>{(item) => <TaskCard item={item} />}</DataViewList>
  *   </DataViewContent>
  *   <DataViewPagination />
+ * </DataViewProvider>
+ * ```
+ * 
+ * @example
+ * ```tsx
+ * // Dynamic baseQuery example (automatically refetches when toggle changes)
+ * const [showClosed, setShowClosed] = useState(false);
+ * const baseQuery = useCallback(
+ *   (query) => query.in('status', showClosed ? allStatuses : activeStatuses),
+ *   [showClosed]
+ * );
+ * 
+ * <DataViewProvider baseQuery={baseQuery}>
+ *   <Toggle checked={showClosed} onChange={setShowClosed} />
+ *   ...
  * </DataViewProvider>
  * ```
  */

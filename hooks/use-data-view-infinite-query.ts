@@ -11,7 +11,14 @@
  * 2. Custom data fetcher support for non-Supabase data sources
  * 3. Post-fetch data transformation via `onDataLoaded` callback
  * 4. Automatic reset when filters/search/sort change
- * 5. URL-based state management integration
+ * 5. Automatic refetch when callback references change (baseQuery, customFetcher, onDataLoaded)
+ * 6. URL-based state management integration
+ * 
+ * Automatic Refetch Behavior:
+ * - Detects when baseQuery, customFetcher, or onDataLoaded callbacks change
+ * - Automatically triggers refetch when callback dependencies change
+ * - Example: If baseQuery depends on [projectId, showClosedTasks], changing 
+ *   showClosedTasks will automatically refetch with the new query
  * 
  * @example
  * ```tsx
@@ -34,6 +41,16 @@
  *     const res = await fetch(`/api/items?page=${ctx.page}`);
  *     return res.json();
  *   },
+ * });
+ * 
+ * // With dynamic baseQuery (automatically refetches when showClosed changes)
+ * const baseQuery = useCallback(
+ *   (query) => query.eq('project_id', projectId).in('status', showClosed ? allStatuses : activeStatuses),
+ *   [projectId, showClosed]
+ * );
+ * const { data } = useDataViewInfiniteQuery({
+ *   tableName: 'tasks',
+ *   baseQuery, // Refetches automatically when this reference changes
  * });
  * ```
  */
@@ -287,17 +304,27 @@ function applySort(
 }
 
 /**
- * Create a stable key from the query parameters for cache invalidation
+ * Create a stable key from the query parameters for cache invalidation.
+ * Includes callback references to trigger refetch when they change.
  */
-function createQueryKey(props: UseDataViewInfiniteQueryProps<any>): string {
+function createQueryKey(
+  props: UseDataViewInfiniteQueryProps<any>,
+  callbackRefs: {
+    baseQueryRef: number;
+    customFetcherRef: number;
+    onDataLoadedRef: number;
+  }
+): string {
   return JSON.stringify({
     tableName: props.tableName,
     columns: props.columns,
     filters: props.filters,
     search: props.search,
     sort: props.sort,
-    // Include custom fetcher identity if available
-    hasCustomFetcher: !!props.customFetcher,
+    // Track callback changes via reference counters
+    baseQueryRef: callbackRefs.baseQueryRef,
+    customFetcherRef: callbackRefs.customFetcherRef,
+    onDataLoadedRef: callbackRefs.onDataLoadedRef,
   })
 }
 
@@ -389,9 +416,43 @@ export function useDataViewInfiniteQuery<
     }
   })
 
+  // =========================================================================
+  // Callback Reference Tracking
+  // =========================================================================
+  
+  /**
+   * Track callback references to detect when they change.
+   * When a callback changes (e.g., baseQuery with new showClosedTasks value),
+   * we increment the counter to invalidate the query key and trigger refetch.
+   */
+  const baseQueryRefCounter = useRef(0)
+  const baseQueryPrevRef = useRef(baseQuery)
+  if (baseQueryPrevRef.current !== baseQuery) {
+    baseQueryRefCounter.current++
+    baseQueryPrevRef.current = baseQuery
+  }
+  
+  const customFetcherRefCounter = useRef(0)
+  const customFetcherPrevRef = useRef(customFetcher)
+  if (customFetcherPrevRef.current !== customFetcher) {
+    customFetcherRefCounter.current++
+    customFetcherPrevRef.current = customFetcher
+  }
+  
+  const onDataLoadedRefCounter = useRef(0)
+  const onDataLoadedPrevRef = useRef(onDataLoaded)
+  if (onDataLoadedPrevRef.current !== onDataLoaded) {
+    onDataLoadedRefCounter.current++
+    onDataLoadedPrevRef.current = onDataLoaded
+  }
+  
   // Track the current query key to detect changes
   const queryKeyRef = useRef<string>('')
-  const currentQueryKey = createQueryKey(props)
+  const currentQueryKey = createQueryKey(props, {
+    baseQueryRef: baseQueryRefCounter.current,
+    customFetcherRef: customFetcherRefCounter.current,
+    onDataLoadedRef: onDataLoadedRefCounter.current,
+  })
   
   // Track if we've initialized with initialData
   const initialDataUsedRef = useRef(!!initialData?.data.length)

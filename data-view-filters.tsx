@@ -12,7 +12,7 @@
  * ```
  */
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { Check, ChevronLeft, FunnelX, ListFilter, Search } from 'lucide-react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useTranslations } from 'next-intl'
@@ -121,13 +121,15 @@ function FilterOptionsList({
 export interface DataViewFiltersProps {
   /** Additional className for styling */
   className?: string
+  /** Override the trigger contents (defaults to the filter icon) */
+  children?: ReactNode
 }
 
 // ============================================================================
 // Component
 // ============================================================================
 
-export function DataViewFilters({ className }: DataViewFiltersProps) {
+export function DataViewFilters({ className, children }: DataViewFiltersProps) {
   const { filters, currentFilters, handleFiltersChange } = useDataView()
   const { currentLocale } = useLocaleInfo()
   const t = useTranslations('Common')
@@ -240,10 +242,11 @@ export function DataViewFilters({ className }: DataViewFiltersProps) {
       <DropdownMenuTrigger asChild>
         <Button
           variant="outline"
-          size="icon"
-          className={cn('bg-card text-muted-foreground relative', className)}
+          size="none"
+          typography={false}
+          className={cn('bg-card text-muted-foreground relative gap-1.5 w-auto px-3 min-w-12 min-h-12 rounded-xl text-xs/normal', className)}
         >
-          <ListFilter />
+          {children ?? <ListFilter />}
           {activeFilterCount > 0 && (
             <span className="text-xxs font-medium absolute -top-1 -right-1 bg-primary text-primary-foreground rounded-full size-5 flex items-center justify-center">
               {activeFilterCount}
